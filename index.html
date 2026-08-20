@@ -59,52 +59,6 @@
             font-size: 14px;
             margin-top: 8px;
         }
-        .input-area {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        input {
-            flex: 1;
-            min-width: 180px;
-            padding: 12px 16px;
-            background: #222;
-            border: 1px solid #444;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input:focus {
-            border-color: #f0c040;
-        }
-        button {
-            padding: 12px 28px;
-            background: #f0c040;
-            border: none;
-            border-radius: 6px;
-            color: #1a1a1a;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-family: inherit;
-        }
-        button:hover {
-            background: #e0b030;
-        }
-        .message {
-            margin-top: 20px;
-            font-size: 15px;
-            min-height: 24px;
-            color: #f0a0a0;
-        }
-        .message.success {
-            color: #80d080;
-        }
         .reset-btn {
             margin-top: 30px;
             background: transparent;
@@ -135,50 +89,58 @@
             display: block;
             margin-bottom: 10px;
         }
+        .url-hint {
+            margin-top: 20px;
+            color: #888;
+            font-size: 14px;
+            border-top: 1px dashed #333;
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
-        <!-- 动态内容由 JavaScript 渲染 -->
-    </div>
+    <div class="container" id="app"></div>
 
     <script>
         // ---------- 关卡数据 ----------
         const levels = [
-            { path: 'level-1',       title: '第一关', question: '进入第二关', answer: 'level-2' },
-            { path: 'level-2',       title: '第二关', question: '进入第伞关', answer: 'level-umbrella' },
-            { path: 'level-umbrella',title: '第三关', question: '发光的水果', answer: 'apple' },
-            { path: 'apple',         title: '第四关', question: '切了吃', answer: 'huawei' },
-            { path: 'huawei',        title: '第五关', question: 'rmoshbghh key github（密钥为 github，维吉尼亚解密）', answer: 'levlnaazo' },
-            { path: 'levlnaazo',     title: '第六关', question: 'URL 不对劲', answer: 'levelnazo' },
-            { path: 'levelnazo',     title: '第七关', question: 'Backrooms-CN', answer: 'liminal' },
-            { path: 'liminal',       title: '🎉 终点', question: '你成功穿越了阈限空间！', answer: null }
+            { path: 'level-1',       title: '第一关', question: '进入第二关' },
+            { path: 'level-2',       title: '第二关', question: '进入第伞关' },
+            { path: 'level-umbrella',title: '第三关', question: '发光的水果' },
+            { path: 'apple',         title: '第四关', question: '切了吃' },
+            { path: 'huawei',        title: '第五关', question: 'rmoshbghh key github' },
+            { path: 'levlnaazo',     title: '第六关', question: 'URL 不对劲' },
+            { path: 'levelnazo',     title: '第七关', question: 'Backrooms' },
+            { path: 'liminal',       title: '第八关', question: 'Technoblade Never Dies!' }
+            { path: 'hypixel',       title: '第九关', question: '企鹅' }
+            { path: 'qq',            title: '第十关', question: '聊天、打游戏' }
+            { path: 'discord',       title: '第十一关', question: 'What's on Wikidot? (Please look at the URL now)' }
+            { path: 'discond',       title: '第十二关', question: '云想衣裳花想容' }
+            { path: 'revlon',        title: '第十三关', question: '·-- ···· ·- - / - ···· · / ···· · ·-·· ·-··' }
+            { path: 'what-the-hell', title: '第十四关', question: 'RUN!' }
+            { path: 'exclamation',   title: '终点', question: '这里是终点。恭喜通关！' }
         ];
 
-        // 辅助：获取当前路径（去除首尾斜杠）
+        // ---------- 辅助函数 ----------
         function getCurrentPath() {
             let p = location.pathname.replace(/^\/|\/$/g, '');
             if (!p) p = 'level-1';
             return p;
         }
 
-        // 获取当前关卡索引
         function getLevelIndex(path) {
             return levels.findIndex(l => l.path === path);
         }
 
-        // 获取 localStorage 中的最大解锁索引，默认 0（第一关解锁）
         function getMaxLevel() {
             const val = parseInt(localStorage.getItem('nazo_max_level'), 10);
             return isNaN(val) ? 0 : val;
         }
 
-        // 设置最大解锁索引
         function setMaxLevel(index) {
             localStorage.setItem('nazo_max_level', String(index));
         }
 
-        // 重置进度
         function resetProgress() {
             localStorage.removeItem('nazo_max_level');
             location.href = '/level-1';
@@ -189,25 +151,27 @@
             const app = document.getElementById('app');
             const currentPath = getCurrentPath();
             const idx = getLevelIndex(currentPath);
-            const maxLevel = getMaxLevel();
+            let maxLevel = getMaxLevel();
 
-            // 如果路径无效，或当前关卡未解锁 -> 跳回第一关
-            if (idx === -1 || idx > maxLevel) {
-                if (currentPath !== 'level-1') {
-                    location.href = '/level-1';
-                    return;
-                }
-                // 如果第一关也未解锁（理论上不会），则强行解锁第一关
-                if (maxLevel < 0) setMaxLevel(0);
-            }
-
-            const level = levels[idx];
-            if (!level) {
+            // 1. 无效路径 → 重置到第一关
+            if (idx === -1) {
                 location.href = '/level-1';
                 return;
             }
 
-            // 判断是否为终点
+            // 2. 解锁逻辑
+            if (idx > maxLevel + 1) {
+                // 跳过太多 → 重置
+                location.href = '/level-1';
+                return;
+            } else if (idx === maxLevel + 1) {
+                // 正好是下一关 → 解锁！
+                setMaxLevel(idx);
+                maxLevel = idx; // 更新内存变量
+            }
+            // 否则 idx <= maxLevel，已解锁，正常显示
+
+            const level = levels[idx];
             const isEnd = (level.path === 'liminal');
 
             // 构建 HTML
@@ -216,84 +180,35 @@
                 <h1>🔍 谜题</h1>
                 <div class="question">
                     ${level.question}
-                    ${level.path === 'huawei' ? '<div class="hint">💡 提示：维吉尼亚密码，密钥为 github</div>' : ''}
-                    ${level.path === 'levlnaazo' ? '<div class="hint">💡 提示：仔细看看当前 URL 有什么不对劲？</div>' : ''}
-                    ${level.path === 'levelnazo' ? '<div class="hint">💡 提示：Backrooms 与 “阈限空间” 息息相关</div>' : ''}
+                    ${level.path === 'apple' ? '<div class="hint">💡 提示：中国人都知道吧</div>' : ''}
+                    ${level.path === 'levelnazo' ? '<div class="hint">💡 提示：好好想想 Backrooms 是啥</div>' : ''}
+                </div>
+                <div class="url-hint">
+                    🔗 想想 Nazo Game 让你干什么<!-- 修改地址栏中的 <strong>路径名</strong> 进入下一关 -->
                 </div>
             `;
 
             if (isEnd) {
-                // 终点展示庆祝
                 html += `
                     <div class="celebrate">
                         <span class="emoji">🎊</span>
                         恭喜你通关所有谜题！<br>
-                        <span style="font-size:18px;color:#aaa;">你已获得解谜大师称号</span>
+                        <span style="font-size:18px;color:#aaa;">Congratulations</span>
                     </div>
                     <button class="reset-btn" onclick="resetProgress()">🔁 重新挑战</button>
                     <div class="footer">—— 终点亦是起点 ——</div>
                 `;
             } else {
-                // 普通关卡：输入框
                 html += `
-                    <div class="input-area">
-                        <input type="text" id="answerInput" placeholder="输入下一关路径..." autofocus>
-                        <button id="submitBtn">进入</button>
-                    </div>
-                    <div class="message" id="msg"></div>
                     <button class="reset-btn" onclick="resetProgress()">🗑️ 重置进度</button>
-                    <div class="footer">💡 答案通常是下一关的路径名（如 level-2）</div>
+                    <div class="footer">💡 提示：路径</div>
                 `;
             }
 
             app.innerHTML = html;
-
-            // 如果不是终点，绑定事件
-            if (!isEnd) {
-                const input = document.getElementById('answerInput');
-                const btn = document.getElementById('submitBtn');
-                const msg = document.getElementById('msg');
-
-                function handleSubmit() {
-                    const userAnswer = input.value.trim();
-                    if (!userAnswer) {
-                        msg.textContent = '请输入答案';
-                        msg.className = 'message';
-                        return;
-                    }
-                    // 忽略大小写
-                    if (userAnswer.toLowerCase() === level.answer.toLowerCase()) {
-                        // 正确！解锁下一关
-                        const nextIdx = idx + 1;
-                        if (nextIdx < levels.length) {
-                            setMaxLevel(nextIdx);
-                            msg.textContent = '✅ 正确！即将跳转...';
-                            msg.className = 'message success';
-                            setTimeout(() => {
-                                location.href = '/' + levels[nextIdx].path;
-                            }, 500);
-                        } else {
-                            // 理论上不会发生，因为终点没有答案
-                            msg.textContent = '🎉 你已通关！';
-                            msg.className = 'message success';
-                        }
-                    } else {
-                        msg.textContent = '❌ 答案不对，再想想...';
-                        msg.className = 'message';
-                        input.value = '';
-                        input.focus();
-                    }
-                }
-
-                btn.addEventListener('click', handleSubmit);
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') handleSubmit();
-                });
-                input.focus();
-            }
         }
 
-        // ---------- 页面加载时渲染 ----------
+        // 页面加载执行
         render();
     </script>
 </body>
