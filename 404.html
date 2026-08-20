@@ -113,12 +113,22 @@
             { path: 'levelnazo',     title: '第七关', question: 'Backrooms' },
             { path: 'liminal',       title: '第八关', question: 'Technoblade Never Dies!' },
             { path: 'hypixel',       title: '第九关', question: '企鹅' },
-            { path: 'qq',            title: '第十关', question: '聊天、打游戏' },
+            { path: 'qq',            title: '第十关', question: '聊天、打游戏、各类社区' },
             { path: 'discord',       title: '第十一关', question: 'What\'s on Wikidot? (Please look at the URL now)' },
             { path: 'discond',       title: '第十二关', question: '云想衣裳花想容' },
             { path: 'revlon',        title: '第十三关', question: '·-- ···· ·- - / - ···· · / ···· · ·-·· ·-··' },
             { path: 'what-the-hell', title: '第十四关', question: 'RUN!' },
-            { path: 'exclamation',   title: '终点', question: '这里是终点。恭喜通关！' }
+            { path: 'exclamation',   title: '第十五关', question: '这里是终点。恭喜通关！吗？' },
+            { path: 'level-601',     title: '第十六关', question: '' },
+            { path: 'blank',         title: '第十七关', question: '磁贴。' },
+            { path: 'windows-8',     title: '第十八关', question: 'Beautiful, Serene, Perfect. But... SD-CLASS-5!' },
+            { path: 'level-14',      title: '第十九关', question: '控制，收容，保护' },
+            { path: 'scp',           title: '第二十关', question: '朝鲜的网络，真不服不行' },
+            { path: 'as131279',      title: '第二十一关', question: '既广阔，又深邃' },
+            { path: 'sea',           title: '第二十二关', question: 'Rule Google' },
+            { path: 'rule34',        title: '第二十三关', question: '曾有万国来朝' },
+            { path: 'nationarea',    title: '第二十四关', question: '本站域名哪来的 :)' },
+            { path: 'dnsexit',       title: '终点', question: '恭喜答完所有题目！请等待我们更新' }
         ];
 
         // ---------- 辅助函数 ----------
@@ -172,7 +182,7 @@
             // 否则 idx <= maxLevel，已解锁，正常显示
 
             const level = levels[idx];
-            const isEnd = (level.path === 'liminal');
+            const isEnd = (level.path === 'dnsexit');
 
             // 构建 HTML
             let html = `
